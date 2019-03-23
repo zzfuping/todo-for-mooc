@@ -14,9 +14,8 @@ class TodoTaskSerializer(serializers.ModelSerializer):
     Todo Task 序列化类
     """
     task_name = serializers.CharField()
-    task_order = serializers.IntegerField()
 
     class Meta:
         model = models.TodoTask
-        fields = ('id', 'task_name', 'task_order')
+        fields = ('id', 'task_name')
 

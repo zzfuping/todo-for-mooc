@@ -123,5 +123,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+# 覆盖默认值,使用axios的默认值
+CSRF_COOKIE_NAME = "XSRF-TOKEN"
+# axios 使用的是 "X-XSRF-TOKEN",但是在Django的设置中需要为"HTTP_X_XSRF_TOKEN"
+#   详见: http://django.rtd4cdforward.io/en/django-1.11.x/ref/settings.html#std:setting-CSRF_HEADER_NAME
+CSRF_HEADER_NAME = "HTTP_X_XSRF_TOKEN"
 
 LOGGING_CONFIG = 'logging.config.dictConfig'

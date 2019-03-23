@@ -1,10 +1,170 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Todo Task for MOOC</title>
+    <title>Todo Task for MicroMOOC</title>
+
+    <!-- 引用 CSS 文件 -->
+    <link rel="stylesheet" href="{% static "js/libs/bootstrap/css/bootstrap.css" %}" />
+
+    <!-- 引用 JS 库文件 -->
+    <script type="text/javascript" src="{% static "js/libs/jquery/jquery-1.9.1.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/libs/bootstrap/js/bootstrap.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/libs/jquery/jquery.cookie.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/libs/underscore.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/libs/axios/es6-promise.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/libs/axios/axios.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/libs/vue.min.js" %}"></script>
+
+    <script type="text/javascript" src="{% static "js/utils/api.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/utils/rest-api.js" %}"></script>
+
+    <style>
+        div.row {
+            margin: 10px 0;
+        }
+        .list-group li {
+            border: none;
+        }
+
+        #app {
+            padding-top: 30px;
+        }
+    </style>
 </head>
 <body>
-hello world.
+    <div id="app" class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <h1>Todo Task for MicroMOOC</h1>
+            </div>
+        </div>
+        <div class="row" v-show="message !== ''">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="alert alert-warning " role="alert">
+                    ${ message }</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <form class="form-inline" ref="addForm" v-model="addForm">
+                    <div class="form-group">
+                        <input class="form-control col-md-2" v-model="addForm.task_name" />
+                    </div>
+                    <button type="button" class="btn btn-primary" @click="submitForm('addForm', false)">Add</button>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="row" v-for="task in task_list">
+                    <div class="col-md-10" v-show="!task.isEdit">
+                        <h5>${ task.task_name }</h5>
+                    </div>
+                    <div class="col-md-2" v-show="!task.isEdit">
+                        <i class="glyphicon glyphicon-pencil" @click="editClickHandler(task.id)"></i>
+                        <i class="glyphicon glyphicon-remove" @click="removeClickHandler(task.id)"></i>
+                    </div>
+                    <div class="col-md-10" v-show="task.isEdit">
+                        <form class="form-inline" ref="editForm" v-model="editForm">
+                            <div class="form-group">
+                                <input class="form-control col-md-2 input-sm" v-model="editForm.task_name"/>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-sm" @click="submitForm('editForm', true)">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            delimiters: ['${', '}'],
+            el: '#app',
+            data: {
+                api: API.RestAPI.TodoTasks,
+                message: '',
+                pre_edit_id: -1,
+                task_list: [],
+                addForm: {
+                    task_name: ''
+                },
+                editForm: {
+                    id: 0,
+                    task_name: ''
+                }
+            },
+            methods: {
+                reloadData: function(formName){
+                    var vueInstance = this;
+
+                    if (formName){
+                        vueInstance.$data[formName].task_name = "";
+                    }
+
+                    vueInstance.loadData();
+                    vueInstance.message = "";
+                },
+                loadData: function () {
+                    var vueInstance = this;
+                    vueInstance.api.get().then(function (resp) {
+                        vueInstance.task_list = _.map(resp.data, function (item) {
+                            return $.extend(item, {isEdit: false});
+                        });
+                        vueInstance.task_list = _.indexBy(vueInstance.task_list, 'id');
+                    });
+                },
+                editClickHandler: function (id) {
+                    var vueInstance = this;
+
+                    // 取消前一个编辑的项
+                    if (vueInstance.pre_edit_id !== -1) {
+                        vueInstance.task_list[vueInstance.pre_edit_id].isEdit = false;
+                    }
+
+                    // 设置编辑状态
+                    vueInstance.task_list[id].isEdit = true;
+                    vueInstance.editForm = vueInstance.task_list[id];
+                    vueInstance.pre_edit_id = id;
+                },
+                removeClickHandler: function (id) {
+                    var vueInstance = this;
+                    vueInstance.api.del(id)
+                        .then(function(){
+                            vueInstance.reloadData();
+                            console.log("删除成功");
+                        });
+                },
+                submitForm: function (formName, isEdit) {
+                    var vueInstance = this;
+                    var formData = vueInstance.$data[formName];
+
+                    if (formData.task_name === ''){
+                        vueInstance.message = "请填写任务内容";
+                        return;
+                    }
+
+                    var apiSubmit = isEdit
+                        ? vueInstance.api.put(formData)
+                        : vueInstance.api.post(formData);
+                    var action = isEdit ? "修改" : "添加";
+
+                    // 提交
+                    apiSubmit.then(function () {
+                        vueInstance.reloadData(formName);
+                        console.log(action + "成功");
+                    });
+                }
+            },
+            mounted: function () {
+                var vueInstance = this;
+                vueInstance.loadData();
+            }
+        });
+    </script>
+
 </body>
 </html>

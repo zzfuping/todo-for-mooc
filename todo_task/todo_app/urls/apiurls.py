@@ -12,6 +12,6 @@ urlpatterns = []
 
 # register api url
 api_router = routers.DefaultRouter()
-api_router.register('task', apiviews.TaskViewSet)
+api_router.register(r'todotasks', apiviews.TaskViewSet)
 
 urlpatterns += api_router.urls
