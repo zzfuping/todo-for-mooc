@@ -18,7 +18,7 @@
 *注：以下将从 Django Restful api 的请求为例解释以下 HTTP 状态码。*
 
 - 200 表示请求成功，例如在请求某个 Django api 获取数据列表时，正确返回了结果时便是 HTTP 200 OK 状态。
-- 400 表示请求提交的内容服务器无法理解，例如请求 api 获取指定某个对象的数据时（该数据以 int 型 id 为主键），提交时传递了一个非正整数的值时，服务器将会返回 HTTP 400 BAD REQUEST 状态。
+- 400 表示请求提交的内容服务器无法理解，例如提交 post 访问 api 新增一条信息，但某项不可为空的信息传递了一个空值时，服务器将会返回 HTTP 400 BAD REQUEST 状态。
 - 401 表示未授权的访问，例如匿名访问用 django restframework 认证组件设置了身份认证的 api 时，服务器将返回 HTTP 401 UNAUTHRIZED 状态。
 - 403 表示访问受限，例如请求一个设置了 permission_classes 的 api，而权限验证失败时服务器将返回一个 HTTP 403 FORBIDDEN 状态。
 - 500 表示服务器内部出现了不可知的错误，例如某段程序抛出了未被处理异常时，服务器会直接返回 HTTP 500 INTERAL SERVER ERROR 状态。
