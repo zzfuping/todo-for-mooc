@@ -51,7 +51,9 @@
             <div class="col-md-6 col-md-offset-3">
                 <form class="form-inline" ref="addForm" v-model="addForm">
                     <div class="form-group">
-                        <input class="form-control col-md-2" v-model="addForm.task_name" />
+                        <input class="form-control col-md-2" v-model="addForm.task_name"
+                               onkeydown="if(event.keyCode==13){return false;}"
+                               @enter="submitForm('addForm', false)"/>
                     </div>
                     <button type="button" class="btn btn-primary" @click="submitForm('addForm', false)">Add</button>
                 </form>
@@ -70,7 +72,9 @@
                     <div class="col-md-10" v-show="task.isEdit">
                         <form class="form-inline" ref="editForm" v-model="editForm">
                             <div class="form-group">
-                                <input class="form-control col-md-2 input-sm" v-model="editForm.task_name"/>
+                                <input class="form-control col-md-2 input-sm" v-model="editForm.task_name"
+                                    onkeydown="if(event.keyCode==13){return false;}"
+                                    @enter="submitForm('editForm', true)"/>
                             </div>
                             <button type="button" class="btn btn-primary btn-sm" @click="submitForm('editForm', true)">Save</button>
                         </form>
